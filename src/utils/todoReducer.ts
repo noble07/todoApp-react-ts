@@ -1,11 +1,11 @@
-import { Actions, ITodo } from "../model/model"
+import { Actions, ITodo, list } from "../model/model"
 
 const todoReducer = (state: ITodo[], action: Actions) => {
   switch (action.type) {
     case 'add':
       return [
         ...state,
-        { id: Date.now(), todo: action.payload, isDone: false }
+        { id: Date.now(), todo: action.payload, isDone: false, list: list.activeTasks }
       ]
     
     case 'remove':
@@ -24,7 +24,14 @@ const todoReducer = (state: ITodo[], action: Actions) => {
         ? { ...todo, todo: action.payload.todo }
         : todo
       ))
-  
+
+    case 'changeList':
+        return state.map(todo => (
+          todo.id === action.payload.id
+          ? { ...todo, list: action.payload.list }
+          : todo
+        ))
+
     default:
       return state
   }

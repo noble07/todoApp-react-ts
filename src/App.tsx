@@ -1,12 +1,12 @@
 import { useReducer, useState } from 'react'
-
-import { ITodo } from './model/model'
+import { DragDropContext, DropResult } from 'react-beautiful-dnd'
 
 import InputField from './components/InputField'
 import TodoList from './components/TodoList'
 import './App.css'
 import todoReducer from './utils/todoReducer'
 import { todoContext } from './utils/todoContext'
+import { list } from './model/model'
 
 const App = () => {
 
@@ -21,17 +21,41 @@ const App = () => {
     setInput('')
   }
 
+  const onDragEnd = (result: DropResult) => {
+    const {source, destination, draggableId} = result
+
+    if (!destination) return
+    if (destination.droppableId === source.droppableId && destination.index === source.index) return
+
+    if(destination.droppableId === 'todosRemove') return dispatch({
+      type: 'changeList',
+      payload: {
+        id: parseInt(draggableId),
+        list: list.completedTasks
+      }})
+
+    dispatch({
+      type: 'changeList',
+      payload: {
+        id: parseInt(draggableId),
+        list: list.activeTasks
+      }
+    })
+  }
+
   return (
     <todoContext.Provider value={{todos, dispatch}} >
-      <div className="App">
-        <span className="heading">Taskify</span>
-        <InputField
-          input={input}
-          setInput={setInput}
-          handleAdd={handleAdd}
-        />
-        <TodoList />
-      </div>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div className="App">
+          <span className="heading">Taskify</span>
+          <InputField
+            input={input}
+            setInput={setInput}
+            handleAdd={handleAdd}
+          />
+          <TodoList />
+        </div>
+      </DragDropContext>
     </todoContext.Provider>
   )
 }
